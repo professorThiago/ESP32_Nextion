@@ -251,39 +251,35 @@ void sendCommand(const char* cmd)
  *
  */
 bool recvRetCommandFinished(uint32_t timeout)
-{    
-    #if NEX_WAIT_COMMAND_FINISHED == 0
+{
+#if NEX_WAIT_COMMAND_FINISHED == 0
+
     return true;
-    #else
-    
-    bool ret = false;
+
+#else
+
     uint8_t temp[4] = {0};
-    
+
     getNexSerial()->setTimeout(timeout);
+
     if (sizeof(temp) != getNexSerial()->readBytes((char *)temp, sizeof(temp)))
     {
-        ret = false;
-    }
-
-    if (temp[0] == NEX_RET_CMD_FINISHED
-        && temp[1] == 0xFF
-        && temp[2] == 0xFF
-        && temp[3] == 0xFF
-        )
-    {
-        ret = true;
-    }
-
-    if (ret) 
-    {
-        dbSerialPrintln("recvRetCommandFinished ok");
-    }
-    else
-    {
         dbSerialPrintln("recvRetCommandFinished err");
+        return false;
     }
-    
-    return ret;
+
+    if (temp[0] == NEX_RET_CMD_FINISHED &&
+        temp[1] == 0xFF &&
+        temp[2] == 0xFF &&
+        temp[3] == 0xFF)
+    {
+        return true;
+    }
+
+    dbSerialPrintln("recvRetCommandFinished err");
+    return false;
+
+#endif
 }
 
 
