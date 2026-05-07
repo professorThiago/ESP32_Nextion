@@ -14,7 +14,7 @@
  */
 
 #include "NexUpload.h"
-#include <SoftwareSerial.h>
+
 
 //#define USE_SOFTWARE_SERIAL
 #ifdef USE_SOFTWARE_SERIAL
