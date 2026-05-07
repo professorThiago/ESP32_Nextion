@@ -9,6 +9,7 @@
 
 // Comente a linha abaixo para desativar mensagens de debug da biblioteca
 #define DEBUG_SERIAL_ENABLE
+#define NEX_WAIT_COMMAND_FINISHED 0
 
 #define dbSerial Serial
 

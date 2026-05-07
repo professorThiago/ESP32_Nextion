@@ -218,6 +218,10 @@ void sendCommand(const char* cmd)
  */
 bool recvRetCommandFinished(uint32_t timeout)
 {    
+    #if NEX_WAIT_COMMAND_FINISHED == 0
+    return true;
+    #else
+    
     bool ret = false;
     uint8_t temp[4] = {0};
     
