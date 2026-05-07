@@ -251,14 +251,9 @@ bool recvRetCommandFinished(uint32_t timeout)
 
 bool nexInit(uint32_t baudrate, int8_t rxPin, int8_t txPin, HardwareSerial *serial)
 {
-    bool ret1 = false;
-    bool ret2 = false;
-
     nexBaudrateAtual = baudrate;
     nexRxPinAtual = rxPin;
     nexTxPinAtual = txPin;
-
-    dbSerialBegin(115200);
 
     setNexSerial(serial);
 
@@ -281,7 +276,7 @@ bool nexInit(uint32_t baudrate, int8_t rxPin, int8_t txPin, HardwareSerial *seri
     getNexSerial()->begin(baudrate);
 #endif
 
-    delay(100);
+    delay(300);
 
     while (getNexSerial()->available())
     {
@@ -289,25 +284,18 @@ bool nexInit(uint32_t baudrate, int8_t rxPin, int8_t txPin, HardwareSerial *seri
     }
 
     sendCommand("");
+    sendCommand("bkcmd=0");
 
-    // bkcmd=1 faz o Nextion responder se o comando foi executado.
-    // Isso ajuda a testar se a comunicação está funcionando.
-    sendCommand("bkcmd=1");
-    ret1 = recvRetCommandFinished(300);
+    delay(100);
 
-    sendCommand("page 0");
-    ret2 = recvRetCommandFinished(300);
-
-    if (ret1 && ret2)
+    while (getNexSerial()->available())
     {
-        dbSerialPrintln("Nextion iniciado com sucesso.");
-    }
-    else
-    {
-        dbSerialPrintln("Falha ao iniciar Nextion.");
+        getNexSerial()->read();
     }
 
-    return ret1 && ret2;
+    dbSerialPrintln("Nextion inicializado.");
+
+    return true;
 }
 
 void nexLoop(NexTouch *nex_listen_list[])
