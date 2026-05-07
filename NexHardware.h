@@ -64,6 +64,8 @@ void setNexSerial(HardwareSerial *serial);
 void nexEnd();
 void nexBegin(uint32_t baudrate);
 
-
+bool nexListen(NexTouch &component);
+void nexClearListenList();
+void nexLoop();
 
 #endif /* #ifndef __NEXHARDWARE_H__ */
