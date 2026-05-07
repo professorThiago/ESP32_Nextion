@@ -34,7 +34,12 @@
 
 
 
+
 static HardwareSerial *nexSerialPtr = &Serial1;
+
+static uint32_t nexBaudrateAtual = 9600;
+static int8_t nexRxPinAtual = -1;
+static int8_t nexTxPinAtual = -1;
 
 HardwareSerial *getNexSerial()
 {
@@ -249,6 +254,10 @@ bool nexInit(uint32_t baudrate, int8_t rxPin, int8_t txPin, HardwareSerial *seri
     bool ret1 = false;
     bool ret2 = false;
 
+    nexBaudrateAtual = baudrate;
+    nexRxPinAtual = rxPin;
+    nexTxPinAtual = txPin;
+
     dbSerialBegin(115200);
 
     setNexSerial(serial);
@@ -332,5 +341,23 @@ void nexLoop(NexTouch *nex_listen_list[])
             }
         }
     }
+}
+
+void nexBegin(uint32_t baudrate)
+{
+#if defined(ESP32)
+    if (nexRxPinAtual >= 0 && nexTxPinAtual >= 0)
+    {
+        getNexSerial()->begin(baudrate, SERIAL_8N1, nexRxPinAtual, nexTxPinAtual);
+    }
+    else
+    {
+        getNexSerial()->begin(baudrate);
+    }
+#else
+    getNexSerial()->begin(baudrate);
+#endif
+
+    nexBaudrateAtual = baudrate;
 }
 

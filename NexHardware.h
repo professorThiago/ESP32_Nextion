@@ -62,6 +62,7 @@ HardwareSerial *getNexSerial();
 void setNexSerial(HardwareSerial *serial);
 
 void nexEnd();
+void nexBegin(uint32_t baudrate);
 
 
 

@@ -105,7 +105,7 @@ bool NexUpload::_checkFile(void)
 bool NexUpload::_searchBaudrate(uint32_t baudrate)
 {
     String string = String("");  
-    getNexSerial()->begin(baudrate);
+    nexBegin(baudrate);
     this->sendCommand("");
     this->sendCommand("connect");
     this->recvRetString(string);  
@@ -177,7 +177,7 @@ bool NexUpload::_setDownloadBaudrate(uint32_t baudrate)
     this->sendCommand("");
     this->sendCommand(cmd.c_str());
     delay(50);
-    getNexSerial()->begin(baudrate);
+    nexBegin(baudrate);
     this->recvRetString(string,500);  
     if(string.indexOf(0x05) != -1)
     { 
