@@ -43,6 +43,7 @@
  * @return none. 
  */
 typedef void (*NexTouchEventCb)(void *ptr);
+typedef void (*NexSimpleEventCb)(void);
 
 /**
  * Father class of the components with touch events.  
@@ -97,6 +98,9 @@ public: /* methods */
      * @return none. 
      */
     void detachPop(void);
+
+    void attachPush(NexSimpleEventCb push);
+    void attachPop(NexSimpleEventCb pop);
     
 private: /* methods */ 
     void push(void);
@@ -107,6 +111,8 @@ private: /* data */
     void *__cbpush_ptr;
     NexTouchEventCb __cb_pop;
     void *__cbpop_ptr;
+    NexSimpleEventCb __simple_cb_push;
+    NexSimpleEventCb __simple_cb_pop;
 };
 
 /**

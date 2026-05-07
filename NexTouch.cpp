@@ -22,12 +22,25 @@ NexTouch::NexTouch(uint8_t pid, uint8_t cid, const char *name)
     this->__cb_pop = NULL;
     this->__cbpop_ptr = NULL;
     this->__cbpush_ptr = NULL;
+
+    this->__simple_cb_pop = NULL;
+    this->__simple_cb_push = NULL;
 }
 
 void NexTouch::attachPush(NexTouchEventCb push, void *ptr)
 {
     this->__cb_push = push;
     this->__cbpush_ptr = ptr;
+}
+
+void NexTouch::attachPush(NexSimpleEventCb push)
+{
+    __simple_cb_push = push;
+}
+
+void NexTouch::attachPop(NexSimpleEventCb pop)
+{
+    __simple_cb_pop = pop;
 }
 
 void NexTouch::detachPush(void)
@@ -50,7 +63,11 @@ void NexTouch::detachPop(void)
 
 void NexTouch::push(void)
 {
-    if (__cb_push)
+    if (__simple_cb_push)
+    {
+        __simple_cb_push();
+    }
+    else if (__cb_push)
     {
         __cb_push(__cbpush_ptr);
     }
@@ -58,7 +75,11 @@ void NexTouch::push(void)
 
 void NexTouch::pop(void)
 {
-    if (__cb_pop)
+    if (__simple_cb_pop)
+    {
+        __simple_cb_pop();
+    }
+    else if (__cb_pop)
     {
         __cb_pop(__cbpop_ptr);
     }
