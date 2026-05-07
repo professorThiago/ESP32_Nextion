@@ -28,7 +28,12 @@
  * 
  * @return true if success, false for failure. 
  */
-bool nexInit(void);
+bool nexInit(
+    uint32_t baudrate = 9600,
+    int8_t rxPin = -1,
+    int8_t txPin = -1,
+    HardwareSerial *serial = &Serial1
+);
 
 /**
  * Listen touch event and calling callbacks attached before.
@@ -51,5 +56,13 @@ bool recvRetNumber(uint32_t *number, uint32_t timeout = 100);
 uint16_t recvRetString(char *buffer, uint16_t len, uint32_t timeout = 100);
 void sendCommand(const char* cmd);
 bool recvRetCommandFinished(uint32_t timeout = 100);
+
+HardwareSerial *getNexSerial();
+
+void setNexSerial(HardwareSerial *serial);
+
+void nexEnd();
+
+
 
 #endif /* #ifndef __NEXHARDWARE_H__ */

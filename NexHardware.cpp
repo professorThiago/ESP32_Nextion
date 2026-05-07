@@ -32,6 +32,33 @@
 #define NEX_RET_INVALID_VARIABLE        (0x1A)
 #define NEX_RET_INVALID_OPERATION       (0x1B)
 
+
+
+static HardwareSerial *nexSerialPtr = &Serial1;
+
+HardwareSerial *getNexSerial()
+{
+    return nexSerialPtr;
+}
+
+void setNexSerial(HardwareSerial *serial)
+{
+    if (serial != nullptr)
+    {
+        nexSerialPtr = serial;
+    }
+}
+
+void nexEnd()
+{
+    if (nexSerialPtr != nullptr)
+    {
+        nexSerialPtr->end();
+    }
+}
+
+
+
 /*
  * Receive uint32_t data. 
  * 
@@ -52,8 +79,8 @@ bool recvRetNumber(uint32_t *number, uint32_t timeout)
         goto __return;
     }
     
-    nexSerial.setTimeout(timeout);
-    if (sizeof(temp) != nexSerial.readBytes((char *)temp, sizeof(temp)))
+    getNexSerial()->setTimeout(timeout);
+    if (sizeof(temp) != getNexSerial()->readBytes((char *)temp, sizeof(temp)))
     {
         goto __return;
     }
@@ -111,9 +138,9 @@ uint16_t recvRetString(char *buffer, uint16_t len, uint32_t timeout)
     start = millis();
     while (millis() - start <= timeout)
     {
-        while (nexSerial.available())
+        while (getNexSerial()->available())
         {
-            c = nexSerial.read();
+            c = getNexSerial()->read();
             if (str_start_flag)
             {
                 if (0xFF == c)
@@ -163,15 +190,15 @@ __return:
  */
 void sendCommand(const char* cmd)
 {
-    while (nexSerial.available())
+    while (getNexSerial()->available())
     {
-        nexSerial.read();
+        getNexSerial()->read();
     }
     
-    nexSerial.print(cmd);
-    nexSerial.write(0xFF);
-    nexSerial.write(0xFF);
-    nexSerial.write(0xFF);
+    getNexSerial()->print(cmd);
+    getNexSerial()->write(0xFF);
+    getNexSerial()->write(0xFF);
+    getNexSerial()->write(0xFF);
 }
 
 
@@ -189,8 +216,8 @@ bool recvRetCommandFinished(uint32_t timeout)
     bool ret = false;
     uint8_t temp[4] = {0};
     
-    nexSerial.setTimeout(timeout);
-    if (sizeof(temp) != nexSerial.readBytes((char *)temp, sizeof(temp)))
+    getNexSerial()->setTimeout(timeout);
+    if (sizeof(temp) != getNexSerial()->readBytes((char *)temp, sizeof(temp)))
     {
         ret = false;
     }
@@ -217,18 +244,60 @@ bool recvRetCommandFinished(uint32_t timeout)
 }
 
 
-bool nexInit(void)
+bool nexInit(uint32_t baudrate, int8_t rxPin, int8_t txPin, HardwareSerial *serial)
 {
     bool ret1 = false;
     bool ret2 = false;
-    
-    dbSerialBegin(9600);
-    nexSerial.begin(9600);
+
+    dbSerialBegin(115200);
+
+    setNexSerial(serial);
+
+    if (getNexSerial() == nullptr)
+    {
+        dbSerialPrintln("Erro: serial do Nextion nao configurada.");
+        return false;
+    }
+
+#if defined(ESP32)
+    if (rxPin >= 0 && txPin >= 0)
+    {
+        getNexSerial()->begin(baudrate, SERIAL_8N1, rxPin, txPin);
+    }
+    else
+    {
+        getNexSerial()->begin(baudrate);
+    }
+#else
+    getNexSerial()->begin(baudrate);
+#endif
+
+    delay(100);
+
+    while (getNexSerial()->available())
+    {
+        getNexSerial()->read();
+    }
+
     sendCommand("");
+
+    // bkcmd=1 faz o Nextion responder se o comando foi executado.
+    // Isso ajuda a testar se a comunicação está funcionando.
     sendCommand("bkcmd=1");
-    ret1 = recvRetCommandFinished();
+    ret1 = recvRetCommandFinished(300);
+
     sendCommand("page 0");
-    ret2 = recvRetCommandFinished();
+    ret2 = recvRetCommandFinished(300);
+
+    if (ret1 && ret2)
+    {
+        dbSerialPrintln("Nextion iniciado com sucesso.");
+    }
+    else
+    {
+        dbSerialPrintln("Falha ao iniciar Nextion.");
+    }
+
     return ret1 && ret2;
 }
 
@@ -239,19 +308,19 @@ void nexLoop(NexTouch *nex_listen_list[])
     uint16_t i;
     uint8_t c;  
     
-    while (nexSerial.available() > 0)
+    while (getNexSerial()->available() > 0)
     {   
         delay(10);
-        c = nexSerial.read();
+        c = getNexSerial()->read();
         
         if (NEX_RET_EVENT_TOUCH_HEAD == c)
         {
-            if (nexSerial.available() >= 6)
+            if (getNexSerial()->available() >= 6)
             {
                 __buffer[0] = c;  
                 for (i = 1; i < 7; i++)
                 {
-                    __buffer[i] = nexSerial.read();
+                    __buffer[i] = getNexSerial()->read();
                 }
                 __buffer[i] = 0x00;
                 
