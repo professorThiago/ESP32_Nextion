@@ -41,10 +41,10 @@ static uint32_t nexBaudrateAtual = 9600;
 static int8_t nexRxPinAtual = -1;
 static int8_t nexTxPinAtual = -1;
 
-const uint8_t NEX_MAX_COMPONENTES = 100;
+const uint16_t NEX_MAX_COMPONENTES = 255;
 
 static NexTouch *nexListenList[NEX_MAX_COMPONENTES + 1] = {NULL};
-static uint8_t nexListenCount = 0;
+static uint16_t nexListenCount = 0;
 
 HardwareSerial *getNexSerial()
 {
